@@ -3,15 +3,13 @@ services:
     name: ai-privacy-gateway
     env: python
     plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-      python -m spacy download en_core_web_sm
-       startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
       - key: LLM_PROVIDER
-        value: ollama  # (بعداً به openai یا together تغییر می‌دهیم)
+        value: ollama
       - key: LLM_BASE_URL
         value: http://localhost:11434/v1
       - key: LLM_MODEL
