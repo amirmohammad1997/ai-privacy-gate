@@ -34,9 +34,21 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = ""
     SESSION_ENCRYPTION_KEY: str = ""
 
-    # ─── Database (filled later) ───
-    DATABASE_URL: str = ""
-    REDIS_URL: str = ""
+    # ═══════════════════════════════════════════════════════
+    # Database (PostgreSQL)
+    # ═══════════════════════════════════════════════════════
+    DATABASE_URL: str = "postgresql+asyncpg://aipg:aipg-dev-password@localhost:5432/aipg"
+    DATABASE_URL_SYNC: str = "postgresql://aipg:aipg-dev-password@localhost:5432/aipg"
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 10
+    DB_ECHO: bool = False
+
+    # ═══════════════════════════════════════════════════════
+    # Redis
+    # ═══════════════════════════════════════════════════════
+    REDIS_URL: str = "redis://localhost:6379/0"
+    TOKEN_TTL_SECONDS: int = 3600
+    PRESENCE_TTL_SECONDS: int = 120
 
     # ─── CORS ───
     ALLOWED_ORIGINS: str = "*"

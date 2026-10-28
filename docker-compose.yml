@@ -1,0 +1,74 @@
+services:
+  # ═══════════════════════════════════════════════════════
+  # AI Privacy Gateway (FastAPI App)
+  # ═══════════════════════════════════════════════════════
+  gateway:
+    build: .
+    container_name: aipg-gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://aipg:aipg-dev-password@postgres:5432/aipg
+      - DATABASE_URL_SYNC=postgresql://aipg:aipg-dev-password@postgres:5432/aipg
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aipg-net
+
+  # ═══════════════════════════════════════════════════════
+  # PostgreSQL Database
+  # ═══════════════════════════════════════════════════════
+  postgres:
+    image: postgres:16-alpine
+    container_name: aipg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aipg
+      POSTGRES_PASSWORD: aipg-dev-password
+      POSTGRES_DB: aipg
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aipg"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aipg-net
+
+  # ═══════════════════════════════════════════════════════
+  # Redis Cache
+  # ═══════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: aipg-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aipg-net
+
+networks:
+  aipg-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

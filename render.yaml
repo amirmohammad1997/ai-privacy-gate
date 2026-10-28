@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: ai-privacy-gateway
+    env: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m spacy download en_core_web_sm
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: LLM_PROVIDER
+        value: ollama  # (بعداً به openai یا together تغییر می‌دهیم)
+      - key: LLM_BASE_URL
+        value: http://localhost:11434/v1
+      - key: LLM_MODEL
+        value: llama3.2:1b
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aipg-db
+          property: connectionString
+      - key: REDIS_URL
+        value: redis://localhost:6379/0
+      - key: GATEWAY_API_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: SESSION_ENCRYPTION_KEY
+        generateValue: true
+
+databases:
+  - name: aipg-db
+    plan: free
